@@ -106,3 +106,32 @@ class GameState:
                     warnings.append("You hear rustling.")
         
         self.message = " ".join(warnings) if warnings else ""
+    
+    def shoot_arrow(self, dr, dc):
+        """Shoot an arrow in the specified direction"""
+        if self.game_over or self.arrows <= 0:
+            return
+            
+        self.arrows -= 1
+        
+        r, c = self.player_pos
+        while True:
+            r += dr
+            c += dc
+            
+            # Arrow went out of bounds
+            if not (0 <= r < ROWS and 0 <= c < COLS):
+                self.message = "Your arrow flies off into the darkness."
+                break
+                
+            cell_type = self.grid[r][c]
+            if cell_type == "wumpus":
+                self.game_over = True
+                self.win = True
+                self.message = "You killed the Wumpus! You win!"
+                break
+        
+        # Check if out of arrows
+        if self.arrows <= 0 and not self.win:
+            self.game_over = True
+            self.message = "Game Over! You're out of arrows!"
