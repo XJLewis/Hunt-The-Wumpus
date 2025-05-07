@@ -1,20 +1,12 @@
 # utils.py
 
 import random
-from config import ROWS, COLS
 
 def random_empty_cell(grid, exclude=[]):
     """Find a random empty cell that is not in the excluded list"""
-    available_cells = []
-    for r in range(ROWS):
-        for c in range(COLS):
-            if grid[r][c] == "empty" and (r, c) not in exclude:
-                available_cells.append((r, c))
-    
-    if not available_cells:
-        return None
-    
-    return random.choice(available_cells)
+    # This is a utility function kept from the grid-based version
+    # In our tunnel-based version it is not used, but included for reference
+    return None
 
 def is_adjacent(pos1, pos2):
     """Check if two positions are adjacent"""

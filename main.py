@@ -2,9 +2,9 @@
 
 import pygame
 import sys
-from config import WIDTH, HEIGHT, ROWS, COLS, TILE_SIZE
+from config import WIDTH, HEIGHT
 from game_state import GameState
-from renderer import draw_grid, draw_start_screen
+from renderer import draw_game, draw_start_screen, draw_shooting_instructions
 
 # Initialize pygame
 pygame.init()
@@ -17,6 +17,7 @@ game_state = GameState()
 
 # Arrow shooting state
 shooting_mode = False
+arrow_path = []
 
 clock = pygame.time.Clock()
 
@@ -33,7 +34,9 @@ while True:
                 game_state.reset()
         
     else:
-        draw_grid(win, game_state)
+        draw_game(win, game_state)
+        if shooting_mode:
+            draw_shooting_instructions(win)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,39 +51,39 @@ while True:
                 # Restart game
                 elif event.key == pygame.K_r and game_state.game_over:
                     game_state.reset()
+                    shooting_mode = False
+                    arrow_path = []
                 
                 # Enter shooting mode
                 elif event.key == pygame.K_SPACE and not shooting_mode and not game_state.game_over:
                     shooting_mode = True
-                    game_state.message = "Select direction to shoot arrow"
+                    arrow_path = []
+                    game_state.message = "Select tunnels for arrow path (up to 3)"
                 
-                # Movement or shooting based on mode
-                elif not game_state.game_over:
-                    if shooting_mode:
-                        if event.key == pygame.K_UP:
-                            game_state.shoot_arrow(-1, 0)
+                # Handle arrow shooting inputs
+                elif shooting_mode:
+                    if event.key == pygame.K_RETURN:
+                        # Shoot arrow when Enter is pressed
+                        if arrow_path:
+                            game_state.shoot_arrow(arrow_path)
                             shooting_mode = False
-                        elif event.key == pygame.K_DOWN:
-                            game_state.shoot_arrow(1, 0)
-                            shooting_mode = False
-                        elif event.key == pygame.K_LEFT:
-                            game_state.shoot_arrow(0, -1)
-                            shooting_mode = False
-                        elif event.key == pygame.K_RIGHT:
-                            game_state.shoot_arrow(0, 1)
-                            shooting_mode = False
-                        elif event.key == pygame.K_ESCAPE:  # Cancel shooting
-                            shooting_mode = False
-                            game_state.message = ""
-                    else:
-                        if event.key == pygame.K_UP:
-                            game_state.move_player(-1, 0)
-                        elif event.key == pygame.K_DOWN:
-                            game_state.move_player(1, 0)
-                        elif event.key == pygame.K_LEFT:
-                            game_state.move_player(0, -1)
-                        elif event.key == pygame.K_RIGHT:
-                            game_state.move_player(0, 1)
+                            arrow_path = []
+                    elif event.key == pygame.K_ESCAPE:  # Cancel shooting
+                        shooting_mode = False
+                        arrow_path = []
+                        game_state.message = ""
+                    elif event.key >= pygame.K_0 and event.key <= pygame.K_2:
+                        # Add tunnel to path (limit to 3 as in original game)
+                        tunnel_idx = event.key - pygame.K_0  # Convert key to number (0-2)
+                        if len(arrow_path) < 3:
+                            arrow_path.append(tunnel_idx)
+                            game_state.message = f"Arrow path: {arrow_path}"
+                
+                # Movement (if not in shooting mode)
+                elif not game_state.game_over and not shooting_mode:
+                    if event.key >= pygame.K_0 and event.key <= pygame.K_2:
+                        tunnel_idx = event.key - pygame.K_0  # Convert key to number (0-2)
+                        game_state.move_player(tunnel_idx)
 
     pygame.display.flip()
     clock.tick(30)
