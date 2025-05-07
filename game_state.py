@@ -1,5 +1,3 @@
-# game_state.py
-
 import random
 from config import NUM_PITS, NUM_BATS, START_ARROWS
 
@@ -51,30 +49,55 @@ class GameState:
         self.message = ""
         self.show_hazards = False  # Debug mode to show all hazards
         
-        # Place wumpus
-        self.place_wumpus()
+        # Place wumpus - Modified to be closer to the player (medium distance)
+        self.place_wumpus_closer()
         
-        # Place pits
+        # Place pits - Reduced number in config.py
         self.place_pits()
         
-        # Place bats
+        # Place bats - Reduced number in config.py
         self.place_bats()
         
         # Set initial warnings
         self.get_warnings()
 
-    def place_wumpus(self):
-        """Place the wumpus in a random room away from the player"""
-        # Exclude rooms adjacent to the player's starting room and the starting room itself
-        exclude_rooms = [self.player_room] + self.tunnels[self.player_room]
-        possible_rooms = [r for r in self.rooms if r not in exclude_rooms]
-        self.wumpus_room = random.choice(possible_rooms)
+    def place_wumpus_closer(self):
+        """Place the wumpus in a room that's closer to the player (2-3 rooms away)"""
+        # Get rooms that are 2-3 steps away from the player's starting room
+        distance_2_rooms = set()
+        
+        # Get rooms 2 steps away
+        for adjacent_room in self.tunnels[self.player_room]:
+            for r in self.tunnels[adjacent_room]:
+                if r != self.player_room:
+                    distance_2_rooms.add(r)
+        
+        # Get rooms that are 3 steps away
+        distance_3_rooms = set()
+        for room_2_away in distance_2_rooms:
+            for r in self.tunnels[room_2_away]:
+                if r != self.player_room and r not in distance_2_rooms:
+                    distance_3_rooms.add(r)
+        
+        # Prefer rooms that are 3 steps away, but fall back to 2 steps if needed
+        possible_rooms = list(distance_3_rooms) if distance_3_rooms else list(distance_2_rooms)
+        
+        if possible_rooms:
+            self.wumpus_room = random.choice(possible_rooms)
+        else:
+            # Fall back to original logic if needed
+            exclude_rooms = [self.player_room] + self.tunnels[self.player_room]
+            possible_rooms = [r for r in self.rooms if r not in exclude_rooms]
+            self.wumpus_room = random.choice(possible_rooms)
+            
         self.room_contents[self.wumpus_room] = "wumpus"
 
     def place_pits(self):
         """Place pits in random rooms"""
         for _ in range(NUM_PITS):
             exclude_rooms = [self.player_room, self.wumpus_room]
+            # Don't place pits in rooms adjacent to the player's starting room
+            exclude_rooms += self.tunnels[self.player_room]
             exclude_rooms += [i for i, content in enumerate(self.room_contents) if content != "empty"]
             possible_rooms = [r for r in self.rooms if r not in exclude_rooms]
             if possible_rooms:
@@ -85,6 +108,8 @@ class GameState:
         """Place bats in random rooms"""
         for _ in range(NUM_BATS):
             exclude_rooms = [self.player_room, self.wumpus_room]
+            # Don't place bats in rooms adjacent to the player's starting room
+            exclude_rooms += self.tunnels[self.player_room]
             exclude_rooms += [i for i, content in enumerate(self.room_contents) if content != "empty"]
             possible_rooms = [r for r in self.rooms if r not in exclude_rooms]
             if possible_rooms:
@@ -117,9 +142,15 @@ class GameState:
         
         elif room_content == "bat":
             self.message = "Giant bats carried you to another room!"
-            # Move to a random room
             exclude_rooms = [self.player_room]
-            self.player_room = random.choice([r for r in self.rooms if r not in exclude_rooms])
+            # Bats won't drop you in deadly rooms
+            exclude_rooms += [i for i, content in enumerate(self.room_contents) if content in ["wumpus", "pit"]]
+            possible_rooms = [r for r in self.rooms if r not in exclude_rooms]
+            if possible_rooms:
+                self.player_room = random.choice(possible_rooms)
+            else:
+                # Fallback in case there are no safe rooms
+                self.player_room = random.choice([r for r in self.rooms if r != self.player_room])
             self.check_hazards()  # Check hazards again at the new location
     
     def get_warnings(self):
@@ -151,8 +182,8 @@ class GameState:
         # Arrow starts in player's room
         current_room = self.player_room
         
-        # Follow the arrow's path (up to 3 tunnels as in original game)
-        for i, tunnel_index in enumerate(path[:3]):
+        # Follow the arrow's path (up to 5 tunnels - increased from 3)
+        for i, tunnel_index in enumerate(path[:5]):  # Increased arrow range from 3 to 5
             if tunnel_index < 0 or tunnel_index >= len(self.tunnels[current_room]):
                 self.message = "Your arrow flies off into the darkness."
                 break
@@ -166,12 +197,21 @@ class GameState:
                 self.win = True
                 self.message = "You killed the Wumpus! You win!"
                 return
+            
+            # NEW: Small chance arrow finds wumpus even if path is not exact (luck/ricochet)
+            elif i > 0 and random.random() < 0.1:  # 10% chance per room after first room
+                adjacent_rooms = self.tunnels[current_room]
+                if self.wumpus_room in adjacent_rooms:
+                    self.game_over = True
+                    self.win = True
+                    self.message = "Your arrow ricocheted and hit the Wumpus! Lucky shot!"
+                    return
         
         # If we get here, the arrow missed
         self.message = "Your arrow missed."
         
-        # In the original game, there's a chance the wumpus moves after a missed shot
-        if random.random() < 0.75:  # 75% chance wumpus moves
+        # Chance wumpus moves
+        if random.random() < 0.5:  # Reduced from 75% to 50% chance wumpus moves
             self.wake_wumpus()
         
         # Check if out of arrows
@@ -187,8 +227,8 @@ class GameState:
         # Decide if wumpus moves to player's room (ending game) or another adjacent room
         possible_moves = self.tunnels[self.wumpus_room]
         
-        # If player is in an adjacent room, 1/3 chance wumpus moves there
-        if self.player_room in possible_moves and random.random() < 0.33:
+        # If player is in an adjacent room, reduced chance wumpus moves there
+        if self.player_room in possible_moves and random.random() < 0.2:  # Reduced from 33% to 20%
             self.wumpus_room = self.player_room
         else:
             # Move to a random adjacent room
