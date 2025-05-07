@@ -1,3 +1,5 @@
+# main.py
+
 import pygame
 import sys
 from config import WIDTH, HEIGHT

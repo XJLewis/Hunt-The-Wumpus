@@ -1,3 +1,5 @@
+#renderer.py
+
 import pygame
 import math
 from config import WIDTH, HEIGHT, WHITE, GRAY, BLUE, BLACK, RED, GREEN, YELLOW, BROWN, PURPLE
