@@ -1,6 +1,4 @@
-# .github/workflows/main.yml
-
-name: Run Python Unit Tests
+name: Run Python Unit Tests and Linter
 
 on: [push, pull_request]
 
@@ -19,6 +17,11 @@ jobs:
 
     - name: Install dependencies
       run: pip install -r requirements.txt || true
+
+    - name: Run linter (flake8)
+      run: |
+        pip install flake8  # Install flake8 if it's not already in requirements.txt
+        flake8 .  # Run flake8 to lint all Python files in the repository
 
     - name: Run unit tests
       run: python -m unittest discover
