@@ -72,7 +72,7 @@ while True:
                         shooting_mode = False
                         arrow_path = []
                         game_state.message = ""
-                    elif event.key >= pygame.K_1 and event.key <= pygame.K_3:  # Changed from 0-2 to 1-3
+                    elif event.key >= pygame.K_1 and event.key <= pygame.K_3:
                         # Add tunnel to path (limit to 3 as in original game)
                         tunnel_idx = event.key - pygame.K_1  # Convert key to index (0-2)
                         if len(arrow_path) < 3:
@@ -81,7 +81,7 @@ while True:
                 
                 # Movement (if not in shooting mode)
                 elif not game_state.game_over and not shooting_mode:
-                    if event.key >= pygame.K_1 and event.key <= pygame.K_3:  # Changed from 0-2 to 1-3
+                    if event.key >= pygame.K_1 and event.key <= pygame.K_3:
                         tunnel_idx = event.key - pygame.K_1  # Convert key to index (0-2)
                         game_state.move_player(tunnel_idx)
 

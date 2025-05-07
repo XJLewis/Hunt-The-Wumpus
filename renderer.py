@@ -111,7 +111,7 @@ def draw_cave(win, game_state):
         move_color = GREEN
         pygame.draw.circle(win, move_color, (x, y), 8)  # Larger move markers
         
-        # Draw tunnel number for arrow shooting - Updated to display 1-3 instead of 0-2
+        # Draw tunnel number for arrow shooting
         mid_x = (room_positions[game_state.player_room][0] + x) // 2
         mid_y = (room_positions[game_state.player_room][1] + y) // 2
         tunnel_font = pygame.font.SysFont(None, 24)  # Larger font
@@ -194,7 +194,7 @@ def draw_start_screen(win):
         "- Giant Bats (you'll hear rustling nearby)",
         "",
         "Press 1-3 to move through tunnels",  # Updated from 0-2 to 1-3
-        "SPACE + tunnel numbers (1-3) - Shoot arrow through paths",  # Updated from 0-2 to 1-3
+        "SPACE + tunnel numbers (1-3) - Shoot arrow through paths",
         "D - Toggle debug mode",
         "",
         "Press ENTER to begin"
@@ -212,6 +212,6 @@ def draw_shooting_instructions(win):
     pygame.draw.rect(win, RED, instruction_bg, 2)
     
     font = pygame.font.SysFont(None, 24)
-    text = font.render("Enter up to 3 tunnel numbers (1-3) for arrow path, then press ENTER", True, BLACK)  # Updated from 0-2 to 1-3
+    text = font.render("Enter your tunnel number for arrow path, then press ENTER", True, BLACK)
     text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT + 25))
     win.blit(text, text_rect)

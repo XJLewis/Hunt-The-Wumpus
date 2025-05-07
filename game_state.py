@@ -11,7 +11,6 @@ class GameState:
     def reset(self):
         """Reset the game state"""
         # Initialize rooms and tunnels
-        # Original game had 20 rooms (1-20), but we'll use 0-19 for zero-indexing
         self.rooms = list(range(20))
         
         # Define tunnels between rooms (based on dodecahedron structure)
