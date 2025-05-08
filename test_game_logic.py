@@ -1,6 +1,6 @@
 import unittest
 from game_state import GameState
-from config import NUM_PITS, NUM_BATS
+
 
 class TestGameState(unittest.TestCase):
 
@@ -8,14 +8,14 @@ class TestGameState(unittest.TestCase):
         """Set up the test environment."""
         self.game_state = GameState()
         self.game_state.reset()  # Initialize game state
-    
+
     def test_player_movement(self):
         """Test the player's ability to move between rooms."""
         initial_room = self.game_state.player_room
         # Move to a connected room (assume room 1 is a valid move)
         self.game_state.move_player(1)  # Move to room 1
         self.assertNotEqual(self.game_state.player_room, initial_room)
-    
+
     def test_arrow_shooting(self):
         """Test the arrow shooting functionality."""
         self.game_state.player_room = 0  # Start in room 0
@@ -23,8 +23,9 @@ class TestGameState(unittest.TestCase):
         # Define an arrow path
         arrow_path = [1, 2]
         self.game_state.shoot_arrow(arrow_path)
-        self.assertEqual(self.game_state.arrows, 2)  # Arrows should decrease after shooting
-    
+        # Arrows should decrease after shooting
+        self.assertEqual(self.game_state.arrows, 2)
+
     def test_game_over(self):
         """Test if the game properly detects a game over condition."""
         # Set the player in a pit room (assuming room 0 has a pit for testing)

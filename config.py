@@ -1,11 +1,11 @@
-#config.py
+# config.py
 
 WIDTH, HEIGHT = 800, 600
 START_ARROWS = 3
 
 # Hazards
 NUM_PITS = 2
-NUM_BATS = 2 
+NUM_BATS = 2
 
 # Colors
 WHITE = (255, 255, 255)
