@@ -111,7 +111,7 @@ def draw_cave(win, game_state):
 
     # Draw possible moves
     for i, connected_room in enumerate(
-    game_state.tunnels[game_state.player_room]):
+            game_state.tunnels[game_state.player_room]):
         x, y = room_positions[connected_room]
         move_color = GREEN
         pygame.draw.circle(win, move_color, (x, y), 8)  # Larger move markers
